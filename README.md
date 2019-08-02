@@ -5,5 +5,5 @@ It will return the CircleF of highest score among the circles found with your es
 
 Example: You wanna find the circle with 100(+-40) px of Radius (the default error value is 30):
   ```c#
-  CircleF circle = FindCircle(img, estimatedRadius: 100,error: 40);
+  CircleF circle = FindCircle(img, estimatedRadius: 100, error: 40);
   ```
