@@ -2,6 +2,7 @@
 using Emgu.CV.Structure;
 using System.IO;
 using EMU;
+using System.Drawing;
 
 namespace Emgu.CV
 {
@@ -9,8 +10,8 @@ namespace Emgu.CV
     {
         static void Main(string[] args)
         {
-            string path = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName.ToString() + "\\error\\";
-            int estimatedRadius = 120;
+            string path = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName.ToString() + "\\error\\New folder\\";
+            int estimatedRadius = 130;
             CircleF circle;
             Image<Gray, Byte> img;
             CircleDetector circleDetector = new CircleDetector();
@@ -23,17 +24,19 @@ namespace Emgu.CV
                 try
                 {
                     var watch = System.Diagnostics.Stopwatch.StartNew();
-                    circle = circleDetector.FindCircle(img, estimatedRadius: estimatedRadius, error: 100);
+                    circle = circleDetector.FindCircle(img, estimatedRadius: estimatedRadius,patternType: 1, error: 20);
                     watch.Stop();
                     var elapsedMs = watch.ElapsedMilliseconds;
-                    Console.WriteLine("Finished in " + elapsedMs + "ms");
+                    Console.WriteLine("\nFinished in " + elapsedMs + "ms");
                     img.Draw(circle, new Gray(0), 3);
                     Console.WriteLine("found circle with your estimated radius = " + estimatedRadius);
+                    Console.WriteLine("[ " + circle.Center.ToString() + " , R = " + circle.Radius.ToString() + " ]");
+
                 }
                 catch (Exception e)
                 {
                     //circle = new CircleF(new PointF(0, 0), 0);
-                    Console.WriteLine("Cannot find any circles with your estimated radius = " + estimatedRadius);
+                    Console.WriteLine("\nCannot find any circles with your estimated radius = " + estimatedRadius);
                 }
                 CvInvoke.Imshow("result", img);
                 CvInvoke.WaitKey();
