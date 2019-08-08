@@ -10,13 +10,13 @@ namespace Emgu.CV
     {
         static void Main(string[] args)
         {
-            string path = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName.ToString() + "\\error\\New folder\\";
-            int estimatedRadius = 130;
+            string path = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName.ToString() + "\\error\\";
+            int estimatedRadius = 30;
             CircleF circle;
             Image<Gray, Byte> img;
             CircleDetector circleDetector = new CircleDetector();
 
-            foreach (string file in Directory.EnumerateFiles(path, "*.bmp"))
+            foreach (string file in Directory.EnumerateFiles(path, "*.jpg"))
             {
                 string fileName = Path.GetFileName(file);
                 img = new Image<Gray, Byte>(file);

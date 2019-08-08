@@ -12,6 +12,9 @@ namespace EMU
     class CircleDetector 
     {
         List<CircleFWithScore> circles = new List<CircleFWithScore>();
+        static string path = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName.ToString();
+        Mat templ_1 = CvInvoke.Imread( path +"\\1.png", 0);
+        Mat templ_2 = CvInvoke.Imread(path + "\\2.png", 0);
         public CircleF FindCircle(Image<Gray, Byte> image, int estimatedRadius,int patternType, int error = 30) 
         {
             circles.Clear();
@@ -56,13 +59,20 @@ namespace EMU
             }
             //CvInvoke.MatchTemplate(img,templ:templ,)
             //CvInvoke.Imshow("edge", eroded);
+            //var watch = System.Diagnostics.Stopwatch.StartNew();
             CircleF result = FindHighestScoreCircle();
             if (MatchPattern(image, result, patternType))
             {
-                return FindHighestScoreCircle();
+                //watch.Stop();
+                //var elapsedMs = watch.ElapsedMilliseconds;
+                //Console.WriteLine("\nFinished pattern matching in " + elapsedMs + "ms");
+                return result;
             }
             else
             {
+                //watch.Stop();
+                //var elapsedMs = watch.ElapsedMilliseconds;
+                //Console.WriteLine("\nFinished pattern matching in " + elapsedMs + "ms");
                 throw new IndexOutOfRangeException();
             }
                 
@@ -99,26 +109,38 @@ namespace EMU
             }
         }
 
-        bool MatchPattern(Image<Gray, Byte> img,CircleF circle, int type)
+        bool MatchPattern(Image<Gray, Byte> image,CircleF circle, int type)
         {
-            string path = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName.ToString() + "\\"+type.ToString() + ".png";
-            Mat templ, result_templ;
-            templ = CvInvoke.Imread(path, 0);
+            Image<Gray, Byte> img = image.Clone();
+            int scaleRate = (int) circle.Radius/4;
+            CircleF circleTemp = new CircleF();
+            PointF point = new PointF(circle.Center.X / scaleRate, circle.Center.Y / scaleRate);
+            circleTemp.Radius = circle.Radius / scaleRate;
+            circleTemp.Center = point;
+
+            Mat templ,result_templ;
+            if (type == 1)
+            {
+                templ = templ_1;
+            }
+            else
+            {
+                templ = templ_2;
+            }
             result_templ = new Mat();
             Point minLoc = new Point(), maxLoc = new Point();
             double minVal = 1, maxVal = 254;
 
-            CvInvoke.Resize(templ, templ, new System.Drawing.Size((int)circle.Radius * 2, (int)circle.Radius * 2));
+            CvInvoke.Resize(img, img, new System.Drawing.Size((int) (img.Width/scaleRate), (int)(img.Height / scaleRate)));
+            CvInvoke.Resize(templ, templ, new System.Drawing.Size((int)circleTemp.Radius * 2, (int)circleTemp.Radius * 2));
             CvInvoke.MatchTemplate(img, templ, result_templ, Emgu.CV.CvEnum.TemplateMatchingType.CcoeffNormed);
 
             CvInvoke.MinMaxLoc(result_templ, ref minVal, ref maxVal, ref minLoc, ref maxLoc);
 
-            maxLoc.X += (int) circle.Radius;
-            maxLoc.Y += (int) circle.Radius;
-            //Console.WriteLine(circle.Center);
-            //Console.WriteLine(maxLoc);
+            maxLoc.X += (int) circleTemp.Radius;
+            maxLoc.Y += (int) circleTemp.Radius;
 
-            return Distance(circle.Center, maxLoc) < 20;
+            return Distance(circleTemp.Center, maxLoc) < 10;
         }
 
         double Distance(PointF ptn1, PointF ptn2)
